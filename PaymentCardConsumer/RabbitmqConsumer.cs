@@ -45,7 +45,7 @@ namespace PaymentCardConsumer
             _channel.BasicQos(0, 1, false);
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += Consumer_Received;
-
+            _channel.BasicConsume(CardPaymentQueueName, false, consumer);
         }
 
         private void Consumer_Received(object sender, BasicDeliverEventArgs e)

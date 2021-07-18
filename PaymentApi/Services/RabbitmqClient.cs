@@ -5,6 +5,7 @@ using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace PaymentApi.Services
@@ -66,7 +67,9 @@ namespace PaymentApi.Services
 
         private void SendMessage(string message, string routingKey)
         {
-            
+            var props = _model.CreateBasicProperties();
+            props.ContentType = "application/json";
+            _model.BasicPublish(ExchangeName, routingKey, props, Encoding.ASCII.GetBytes(message));
         }
     }
 }

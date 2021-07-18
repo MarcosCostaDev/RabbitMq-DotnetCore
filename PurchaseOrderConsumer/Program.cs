@@ -6,7 +6,15 @@ namespace PurchaseOrderConsumer
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Listening for Topic <payment.purchaseorder>");
+            Console.WriteLine("------------------------------------------");
+            Console.WriteLine();
+            
+            using var client = new RabbitmqConsumer();
+            client.CreateConnection();
+            client.ProcessMessages();
+
+            Console.ReadLine();
         }
     }
 }

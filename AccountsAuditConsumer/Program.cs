@@ -7,7 +7,14 @@ namespace AccountsAuditConsumer
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Listening for Topic <payment.*>");
+            Console.WriteLine("------------------------------");
+            Console.WriteLine();
+
+            using var client = new RabbitmqConsumer();
+            client.CreateConnection();
+            client.ProcessMessages();
+            Console.ReadLine();
         }
     }
 }

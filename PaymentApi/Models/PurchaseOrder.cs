@@ -7,9 +7,9 @@ namespace PaymentApi.Models
 {
     public class PurchaseOrder
     {
-        public decimal AmountToPay;
-        public string PoNumber;
-        public string CompanyName;
-        public int PaymentDayTerms;
+        public decimal AmountToPay { get; set; }
+        public string PoNumber { get; set; }
+        public string CompanyName { get; set; }
+        public int PaymentDayTerms { get; set; }
     }
 }

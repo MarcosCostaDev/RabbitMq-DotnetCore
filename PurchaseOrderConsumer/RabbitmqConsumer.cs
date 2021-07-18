@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AccountsAuditConsumer
+namespace PurchaseOrderConsumer
 {
     public class RabbitmqConsumer : IDisposable
     {
@@ -36,7 +36,7 @@ namespace AccountsAuditConsumer
 
         public void ProcessMessages()
         {
-           
+
 
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
@@ -54,9 +54,11 @@ namespace AccountsAuditConsumer
         {
             try
             {
-                var message = Encoding.UTF8.GetString(e.Body.ToArray());
+                var content = Encoding.UTF8.GetString(e.Body.ToArray());
 
-                Console.WriteLine("Message Received '{0}'", message);
+                var message = JsonConvert.DeserializeObject<PurchaseOrder>(content);
+
+                Console.WriteLine("-- Purchase Order - Routing Key <{0}> : {1}, £{2}, {3}, {4}", e.RoutingKey, message.CompanyName, message.AmountToPay, message.PaymentDayTerms, message.PoNumber);
 
                 _channel.BasicAck(e.DeliveryTag, false);
             }
@@ -66,8 +68,4 @@ namespace AccountsAuditConsumer
             }
         }
     }
-
-
-
-    
 }
