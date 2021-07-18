@@ -12,12 +12,14 @@ namespace DirectPaymentCardConsumer
 {
     public class RabbitmqConsumer : IDisposable
     {
+        private const string ExchangeName = "";
+        private const string RpcQueueName = "rpc_queue";
+
         private const string connectionString = "amqp://guest:guest@localhost:5672/";
         private ConnectionFactory _connectionFactory;
         private IConnection _connection;
         private IModel _channel;
-        private static Random _rnd;
-        private EventingBasicConsumer _consumer;
+        private Random _rnd;
 
         public void CreateConnection()
         {
@@ -25,63 +27,8 @@ namespace DirectPaymentCardConsumer
             {
                 Uri = new Uri(connectionString)
             };
-            _connection = _connectionFactory.CreateConnection();
-            _channel = _connection.CreateModel();
-            _channel.QueueDeclare("rpc_queue", false, false, false, null);
-            _channel.BasicQos(0, 1, false);
-            _consumer = new EventingBasicConsumer(_channel);
-            _channel.BasicConsume("rpc_queue", false, _consumer);
-            _rnd = new Random();
 
         }
-
-        private string MakePayment(BasicGetResult e)
-        {
-            var content = Encoding.UTF8.GetString(e.Body.ToArray());
-
-            var message = JsonConvert.DeserializeObject<CardPayment>(content);
-
-            var response = _rnd.Next(1000, 100000000).ToString(CultureInfo.InvariantCulture);
-            Console.WriteLine("Payment -  {0} : £{1} : Auth Code <{2}> ", message.CardNumber, message.Amount, response);
-
-            return response;
-        }
-
-        private void GetMessageFromQueue()
-        {
-            string response = null;
-            var ea = _consumer.Model.BasicGet("rpc_queue", false);
-            if (ea == null) return;
-            var props = ea.BasicProperties;
-            var replyProps = _channel.CreateBasicProperties();
-            replyProps.CorrelationId = props.CorrelationId;
-
-            Console.WriteLine("----------------------------------------------------------");
-
-            try
-            {
-                response = MakePayment(ea);
-                Console.WriteLine("Correlation ID = {0}", props.CorrelationId);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(" ERROR : " + ex.Message);
-                response = "";
-            }
-            finally
-            {
-                if (response != null)
-                {
-                    var responseBytes = Encoding.UTF8.GetBytes(response);
-                    _channel.BasicPublish("", props.ReplyTo, replyProps, responseBytes);
-                }
-                _channel.BasicAck(ea.DeliveryTag, false);
-            }
-
-            Console.WriteLine("----------------------------------------------------------");
-            Console.WriteLine("");
-        }
-
 
         public void Dispose()
         {
@@ -92,27 +39,68 @@ namespace DirectPaymentCardConsumer
 
         public void ProcessMessages()
         {
-            while (true)
-            {
-                GetMessageFromQueue();
-            }
+            _connection = _connectionFactory.CreateConnection();
+            _channel = _connection.CreateModel();
+            _channel.QueueDeclare(RpcQueueName, true, false, false, null);
+
+            _channel.BasicQos(0, 1, false);
+            var consumer = new EventingBasicConsumer(_channel);
+            consumer.Received += Consumer_Received;
+            _channel.BasicConsume(RpcQueueName, false, consumer);
+            _rnd = new Random();
         }
 
         private void Consumer_Received(object sender, BasicDeliverEventArgs e)
         {
             try
             {
-                var content = Encoding.UTF8.GetString(e.Body.ToArray());
-                var message = JsonConvert.DeserializeObject<CardPayment>(content);
+                string response = null;
+                if (e == null) return;
+                var props = e.BasicProperties;
+                var replyProps = _channel.CreateBasicProperties();
+                replyProps.CorrelationId = props.CorrelationId;
 
-                Console.WriteLine("--- Payment - Routing Key <{0}> : {1} : {2}", e.RoutingKey, message.CardNumber, message.Amount);
+                Console.WriteLine("----------------------------------------------------------");
 
-                _channel.BasicAck(e.DeliveryTag, false);
+                try
+                {
+                    response = MakePayment(e);
+                    Console.WriteLine("Correlation ID = {0}", props.CorrelationId);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(" ERROR : " + ex.Message);
+                    response = "";
+                }
+                finally
+                {
+                    if (response != null)
+                    {
+                        var responseBytes = Encoding.UTF8.GetBytes(response);
+                        _channel.BasicPublish("", props.ReplyTo, replyProps, responseBytes);
+                    }
+                    _channel.BasicAck(e.DeliveryTag, false);
+                }
+
+                Console.WriteLine("----------------------------------------------------------");
+                Console.WriteLine("");
             }
             catch (Exception)
             {
                 _channel.BasicReject(e.DeliveryTag, true);
             }
+        }
+
+        private string MakePayment(BasicDeliverEventArgs e)
+        {
+            var content = Encoding.UTF8.GetString(e.Body.ToArray());
+
+            var message = JsonConvert.DeserializeObject<CardPayment>(content);
+
+            var response = _rnd.Next(1000, 100000000).ToString(CultureInfo.InvariantCulture);
+            Console.WriteLine("Payment -  {0} : £{1} : Auth Code <{2}> ", message.CardNumber, message.Amount, response);
+
+            return response;
         }
     }
 }

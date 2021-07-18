@@ -22,7 +22,7 @@ namespace PaymentApi.Services
         private readonly IConnection _connection;
         private readonly IModel _channel;
         private readonly string _replyQueueName;
-        private readonly EventingBasicConsumer _consumer;
+        private readonly DefaultBasicConsumer _consumer;
 
         public RabbitmqDirectClient(IConfiguration configuration)
         {
@@ -31,19 +31,14 @@ namespace PaymentApi.Services
                 Uri = new Uri(configuration.GetConnectionString("rabbitmq"))
             };
             _connection = _connectionFactory.CreateConnection();
-            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
             _channel = _connection.CreateModel();
 
             _replyQueueName = _channel.QueueDeclare("rpc_reply", true, false, false, null);
-            _channel.BasicQos(0, 1, false);
-            _consumer = new EventingBasicConsumer(_channel);
-            _channel.BasicConsume(_replyQueueName, false, _consumer);
+           // _channel.BasicQos(0, 10, false);
+            _consumer = new DefaultBasicConsumer(_channel);
+            _channel.DefaultConsumer = _consumer;
         }
 
-        private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
 
         public void Dispose()
         {
@@ -63,12 +58,12 @@ namespace PaymentApi.Services
 
             while(true)
             {
-                var ea = _consumer.Model.BasicGet(_replyQueueName, false);
+                var ea = _channel.BasicGet(_replyQueueName, false);
 
                 if (ea?.BasicProperties.CorrelationId != corrId) continue;
 
                 var authCode = Encoding.UTF8.GetString(ea.Body.ToArray());
-                _channel.BasicAck(ea.DeliveryTag, false);
+                _channel.BasicAck(ea.DeliveryTag, true);
                 return authCode;
             }
 

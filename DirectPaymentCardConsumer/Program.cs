@@ -14,7 +14,6 @@ namespace DirectPaymentCardConsumer
             var client = new RabbitmqConsumer();
             client.CreateConnection();
             client.ProcessMessages();
-
             Console.ReadLine();
         }
     }
