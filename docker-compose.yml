@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  paymentapi:
+    image: ${DOCKER_REGISTRY-}paymentapi
+    build:
+      context: .
+      dockerfile: PaymentApi/Dockerfile
+    networks: 
+      - rabbitmq3-network 
+  rabbitmq3:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    environment: 
+        RABBITMQ_ERLANG_COOKIE: 'c6c0cea2-3276-4a6c-88da-1ada829e6350'
+        RABBITMQ_DEFAULT_USER: guest
+        RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+        - ./PaymentApi/App_Data/rabbitmq-data:/var/lib/rabbitmq
+    ports:
+        - 15672:15672
+        - 5672:5672
+    networks: 
+        - rabbitmq3-network
+networks:
+    rabbitmq3-network:
+        driver: bridge

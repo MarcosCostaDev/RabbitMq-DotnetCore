@@ -15,6 +15,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentCardConsumer", "Paym
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PurchaseOrderConsumer", "PurchaseOrderConsumer\PurchaseOrderConsumer.csproj", "{672BC206-F2CE-44B9-883C-FA2319734220}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{140DCA8A-51E6-4919-AAB9-B520AAA5F887}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{55E0AE69-E6F8-44F8-9B9B-2714ABD8D772}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +50,10 @@ Global
 		{672BC206-F2CE-44B9-883C-FA2319734220}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{672BC206-F2CE-44B9-883C-FA2319734220}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{672BC206-F2CE-44B9-883C-FA2319734220}.Release|Any CPU.Build.0 = Release|Any CPU
+		{140DCA8A-51E6-4919-AAB9-B520AAA5F887}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{140DCA8A-51E6-4919-AAB9-B520AAA5F887}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{140DCA8A-51E6-4919-AAB9-B520AAA5F887}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{140DCA8A-51E6-4919-AAB9-B520AAA5F887}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
