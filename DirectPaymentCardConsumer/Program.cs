@@ -6,7 +6,14 @@ namespace DirectPaymentCardConsumer
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+
+            Console.WriteLine("Direct Payment <Queue rpc_queue>");
+            Console.WriteLine("------------------------------------------");
+            Console.WriteLine();
+
+            var client = new RabbitmqConsumer();
+            client.CreateConnection();
+            client.ProcessMessages();
 
             Console.ReadLine();
         }

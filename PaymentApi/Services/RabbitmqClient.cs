@@ -71,5 +71,6 @@ namespace PaymentApi.Services
             props.ContentType = "application/json";
             _model.BasicPublish(ExchangeName, routingKey, props, Encoding.ASCII.GetBytes(message));
         }
+
     }
 }

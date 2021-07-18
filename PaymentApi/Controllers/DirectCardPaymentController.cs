@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using PaymentApi.Models;
 using PaymentApi.Services;
 using System;
@@ -12,18 +13,29 @@ namespace PaymentApi.Controllers
     [ApiController]
     public class DirectCardPaymentController : ControllerBase
     {
-        private readonly IRabbitmqClient _rabbitmqClient;
+        private readonly ILogger<DirectCardPaymentController> _logger;
+        private readonly IRabbitmqDirectClient _rabbitmqClient;
 
-        public DirectCardPaymentController(IRabbitmqClient rabbitmqClient)
+        public DirectCardPaymentController(ILogger<DirectCardPaymentController> logger, IRabbitmqDirectClient rabbitmqClient)
         {
+            _logger = logger;
             _rabbitmqClient = rabbitmqClient;
         }
         
         [HttpPost]
         public IActionResult MakePayment([FromBody] CardPayment payment)
         {
-            _rabbitmqClient.SendPayment(payment);
-            return Ok(payment);
+            try
+            {
+                var result = _rabbitmqClient.MakePayment(payment);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return BadRequest("Error during the operation");
+            }
+            
         }
     }
 }

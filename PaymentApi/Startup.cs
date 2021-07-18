@@ -29,7 +29,8 @@ namespace PaymentApi
         {
 
             services.AddControllers();
-            services.AddScoped<IRabbitmqClient, RabbitmqClient>();
+            services.AddScoped<IRabbitmqClient, RabbitmqClient>()
+                    .AddScoped<IRabbitmqDirectClient, RabbitmqDirectClient>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PaymentApi", Version = "v1" });

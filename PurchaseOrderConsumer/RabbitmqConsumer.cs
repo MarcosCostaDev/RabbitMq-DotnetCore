@@ -12,7 +12,7 @@ namespace PurchaseOrderConsumer
     public class RabbitmqConsumer : IDisposable
     {
         private const string ExchangeName = "Topic_Exchange";
-        private const string AllQueueName = "AllTopic_Queue";
+        private const string PurchaseOrderQueueName = "PurchaseOrderTopic_Queue";
 
         private const string connectionString = "amqp://guest:guest@localhost:5672/";
         private ConnectionFactory _connectionFactory;
@@ -41,13 +41,13 @@ namespace PurchaseOrderConsumer
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
             _channel.ExchangeDeclare(ExchangeName, "topic");
-            _channel.QueueDeclare(AllQueueName, true, false, false, null);
-            _channel.QueueBind(AllQueueName, ExchangeName, "payment.*");
+            _channel.QueueDeclare(PurchaseOrderQueueName, true, false, false, null);
+            _channel.QueueBind(PurchaseOrderQueueName, ExchangeName, "payment.*");
 
             _channel.BasicQos(0, 1, false);
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += Consumer_Received;
-            _channel.BasicConsume(AllQueueName, false, consumer);
+            _channel.BasicConsume(PurchaseOrderQueueName, false, consumer);
         }
 
         private void Consumer_Received(object sender, BasicDeliverEventArgs e)
