@@ -23,7 +23,7 @@ Login: guest
 password: guest
 
 
-# Behaviorment
+# Behavior
 When press start in visual studio, 5 projects will be run:
 - 4 Console applications 
  - PaymentCardConsumer (A listener of Queue card payment endpoint)
